@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "mesh-browser": {
+      "command": "MeshBrowser.exe",
+      "args": [
+        "--mcp"
+      ]
+    }
+  }
+}
