@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
-project(MeshEngine VERSION 0.1.5 LANGUAGES C CXX)
+project(MeshEngine VERSION 1.0.0)
 
 # CEF binary flags pin MSVC to /std:c++17 for targets.
 set(CMAKE_CXX_STANDARD 17)

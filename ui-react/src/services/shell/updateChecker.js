@@ -14,11 +14,12 @@
 
 import { bridge } from "../bridge.js";
 
-const REPO = "/MeshEngine";
+const REPO = "RaffaHitipeuw/BRWRZ"; 
 const GITHUB_API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
-const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
 const INITIAL_DELAY_MS = 300;
-const UPDATE_FLYOUT_WIDTH = 320;
+const UPDATE_CHECK_HOUR = 6;
+const LAST_CHECK_STORAGE_KEY = "mesh.updateChecker.lastCheckDate";
+
 
 let currentAppVersion = "0.1.1";
 let devMode = false;
@@ -194,7 +195,7 @@ export function openFlyout(anchorRect) {
         downloadUrl:
           (activeRelease.assets &&
             activeRelease.assets.find((asset) =>
-              /^MeshEngine-v[0-9]+\.[0-9]+\.[0-9]+-windows-x64\.zip$/i.test(asset.name || "")
+              /^MeshBrowser-v[0-9]+\.[0-9]+\.[0-9]+-windows-x64\.zip$/i.test(asset.name || "")
             )?.browser_download_url) ||
           "",
         sha256: activeRelease.downloadSha256 || "",
@@ -208,13 +209,58 @@ export function closeFlyout() {
   return bridge.overlayHide().catch(() => {});
 }
 
-/** Starts the periodic check (called once when the shell mounts). */
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function shouldCheckForUpdatesToday() {
+  const now = new Date();
+  if (now.getHours() < UPDATE_CHECK_HOUR) {
+    return false;
+  }
+
+  const today = getLocalDateKey(now);
+
+  try {
+    const lastCheckDate = localStorage.getItem(LAST_CHECK_STORAGE_KEY);
+    
+    if (lastCheckDate === today) {
+      return false;
+    }
+  } catch (error) {
+    console.error("[mesh] Gagal membaca storage tanggal update", error);
+    return false;
+  }
+
+  return true;
+}
+
 export function startUpdateChecker() {
-  window.setTimeout(() => {
-    checkForUpdates().catch(() => {});
+  let cancelled = false;
+
+  const timer = window.setTimeout(async () => {
+    if (cancelled) return;
+    if (!shouldCheckForUpdatesToday()) {
+      return;
+    }
+
+    const today = getLocalDateKey();
+
+    try {
+      localStorage.setItem(LAST_CHECK_STORAGE_KEY, today);
+
+      await checkForUpdates();
+      console.info(`[mesh] Cek update harian sukses untuk tanggal: ${today}`);
+    } catch (error) {
+      console.error("[mesh] Gagal melakukan cek update ke GitHub", error);
+    }
   }, INITIAL_DELAY_MS);
-  const timer = window.setInterval(() => {
-    checkForUpdates().catch(() => {});
-  }, CHECK_INTERVAL_MS);
-  return () => window.clearInterval(timer);
+
+  return () => {
+    cancelled = true;
+    window.clearTimeout(timer);
+  };
 }
