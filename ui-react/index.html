@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MeshBrowser</title>
+</head>
+<body>
+  <div id="err-screen" style="color: red; font-family: monospace; padding: 20px; white-space: pre-wrap;"></div>
+  <div id="root"></div>
+
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      document.getElementById('err-screen').textContent +=
+        'ERROR: ' + msg + '\nBaris: ' + line + '\n' + (err && err.stack ? err.stack : '') + '\n\n';
+    };
+  </script>
+
+  <!-- Pastikan hanya ada SATU tag script ini yang mengarah ke /src/main.jsx -->
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

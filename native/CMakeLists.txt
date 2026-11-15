@@ -214,6 +214,7 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/ui/js/generated/shell.js" OR
     "will not load.")
 endif()
 
+
 add_custom_command(TARGET ${MESH_TARGET} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           "${CMAKE_SOURCE_DIR}/ui"
